@@ -1,15 +1,31 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
-  imports = [ ./hardware-configuration.nix ];
+  imports = [ 
+    # Remove or comment out the hardware-configuration.nix import
+    # ./hardware-configuration.nix
+  ];
+
+  # Add these hardware-specific configurations
+  boot.initrd.availableKernelModules = [ "ata_piix" "uhci_hcd" "virtio_pci" "sr_mod" "virtio_blk" ];
+  boot.initrd.kernelModules = [ ];
+  boot.kernelModules = [ ];
+  boot.extraModulePackages = [ ];
+
+  fileSystems."/" = {
+    device = "/dev/vda1";
+    fsType = "ext4";
+  };
+
+  swapDevices = [ ];
+
+  # Networking
+  networking.useDHCP = lib.mkForce true;
+  networking.interfaces.eth0.useDHCP = true;
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
-
-  # Networking
-  networking.useDHCP = false;
-  networking.interfaces.eth0.useDHCP = true;
 
   # Set your time zone.
   time.timeZone = "America/New_York";
@@ -39,8 +55,6 @@
   # Configure console keymap
   console.keyMap = "us";
 
-  # Enable CUPS to print documents.
-  services.printing.enable = false;
   # Enable sound with pipewire.
   hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
@@ -61,6 +75,7 @@
     extraGroups = [ "networkmanager" "wheel" ];
     packages = with pkgs; [
       firefox
+      code-cursor
     ];
   };
 
